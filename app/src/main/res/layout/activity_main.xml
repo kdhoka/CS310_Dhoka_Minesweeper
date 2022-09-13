@@ -13,7 +13,7 @@
         android:layout_height="48dp"
         android:width="64dp"
         android:height="64dp"
-        android:text="4"
+        android:text=""
         android:textAlignment="center"
         android:textSize="32sp"
         android:layout_marginStart="2dp"

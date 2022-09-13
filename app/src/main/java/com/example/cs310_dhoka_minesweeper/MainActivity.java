@@ -6,6 +6,7 @@ import androidx.gridlayout.widget.GridLayout;
 
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -17,6 +18,8 @@ import java.util.Random;
 public class MainActivity extends AppCompatActivity {
 
     private static final int COLUMN_COUNT = 8;
+    private static final int ROW_COUNT = 10;
+    private static final int MINE_COUNT = 4;
     private TextView[][] cell_tvs;
     private ArrayList<Integer> mines;
     private boolean flagging = false;
@@ -30,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private void generateMines(){
         Random rand = new Random();
         mines = new ArrayList<>();
-        while(mines.size() < 4){
+        while(mines.size() < MINE_COUNT){
             int num = rand.nextInt(80);
             if(!mines.contains(num)){
                 mines.add(num);
@@ -46,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             int count = 0;
             for(int i = index[0] - 1; i < index[0] + 2; i++){
                 for(int j = index[1] - 1; j < index[1] + 2; j++){
-                    if((i >= 0 && i <= 9) && (j >= 0 && j <= 7)){
+                    if((i >= 0 && i < ROW_COUNT) && (j >= 0 && j < COLUMN_COUNT)){
                         if(mines.contains((i*8) + j)){
                             count++;
                         }
@@ -63,13 +66,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         generateMines();
 
-        cell_tvs = new TextView[10][8];
+        cell_tvs = new TextView[ROW_COUNT][COLUMN_COUNT];
 
 
         // Method (2): add four dynamically created cells
         GridLayout grid = (GridLayout) findViewById(R.id.gridLayout01);
-        for (int i = 0; i<=9; i++) {
-            for (int j=0; j<=7; j++) {
+        for (int i = 0; i < ROW_COUNT; i++) {
+            for (int j=0; j < COLUMN_COUNT; j++) {
                 TextView tv = new TextView(this);
                 tv.setHeight( dpToPixel(32) );
                 tv.setWidth( dpToPixel(32) );
@@ -98,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
         int[] coords = new int[2];
         coords[0] = -1;
         coords[1] = -1;
-        for(int i = 0; i < 10; i++){
+        for(int i = 0; i < ROW_COUNT; i++){
             for(int j = 0; j < COLUMN_COUNT; j++){
                 if(cell_tvs[i][j] == tv){
                     coords[0] = i;
@@ -117,16 +120,21 @@ public class MainActivity extends AppCompatActivity {
             if(tv.getCurrentTextColor() == Color.GREEN) {
                 tv.setText(R.string.flag);
                 tv.setTextColor(Color.GRAY);
-                TextView mode = (TextView) findViewById(R.id.textViewFlagCount);
-                mode.setText(String.valueOf(Integer.parseInt(mode.getText().toString())-1));
+                TextView flags = (TextView) findViewById(R.id.textViewFlagCount);
+                flags.setText(String.valueOf(Integer.parseInt(flags.getText().toString())-1));
             } else if(tv.getText().toString().equals(getString(R.string.flag))){
                 tv.setText("");
                 tv.setTextColor(Color.GREEN);
-                TextView mode = (TextView) findViewById(R.id.textViewFlagCount);
-                mode.setText(String.valueOf(Integer.parseInt(mode.getText().toString())+1));
+                TextView flags = (TextView) findViewById(R.id.textViewFlagCount);
+                flags.setText(String.valueOf(Integer.parseInt(flags.getText().toString())+1));
             }
         } else {
             reveal(n);
+        }
+
+        if(checkWin()){
+            TextView mode = (TextView) findViewById(R.id.textViewMode);
+            mode.setText(R.string.mine);
         }
     }
 
@@ -141,15 +149,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void reveal(int[] index){
+    private void reveal(int[] index){
         int i = index[0];
         int j = index[1];
         if(cell_tvs[i][j].getCurrentTextColor() == Color.GREEN){
             int mines = detectMines(index);
             if(mines == -1){
-                cell_tvs[i][j].setText(R.string.bomb);
+                cell_tvs[i][j].setText(R.string.mine);
                 cell_tvs[i][j].setTextColor(Color.GRAY);
                 cell_tvs[i][j].setBackgroundColor(Color.LTGRAY);
+                lose();
             } else if (mines > 0){
                 cell_tvs[i][j].setText(String.valueOf(mines));
                 cell_tvs[i][j].setTextColor(Color.GRAY);
@@ -160,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                 cell_tvs[i][j].setBackgroundColor(Color.LTGRAY);
                 for(int m = index[0] - 1; m < index[0] + 2; m++){
                     for(int n = index[1] - 1; n < index[1] + 2; n++){
-                        if((m >= 0 && m <= 9) && (n >= 0 && n <= 7)){
+                        if((m >= 0 && m < ROW_COUNT) && (n >= 0 && n < COLUMN_COUNT)){
                             int[] neighbor = new int[2];
                             neighbor[0] = m;
                             neighbor[1] = n;
@@ -187,7 +196,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean checkWin(){
-
+        int count = 0;
+        for(int i = 0; i < ROW_COUNT; i++){
+            for(int j = 0; j < COLUMN_COUNT; j++){
+                if(((ColorDrawable) cell_tvs[i][j].getBackground()).getColor() == Color.parseColor("lime")){
+                    count++;
+                }
+                if(count > MINE_COUNT){
+                    return false;
+                }
+            }
+        }
         return true;
+    }
+
+    private void lose(){
     }
 }
