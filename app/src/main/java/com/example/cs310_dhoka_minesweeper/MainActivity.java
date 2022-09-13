@@ -38,14 +38,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     private int detectMines(@NonNull int[] index){
-        System.out.println("Detecting mines");
         if(mines.contains((index[0]*8) + index[1])){
             return -1;
         } else {
             int count = 0;
             for(int i = index[0] - 1; i < index[0] + 2; i++){
                 for(int j = index[1] - 1; j < index[1] + 2; j++){
-                    if((i >= 0 && i <= 7) && (j >= 0 && j <= 7)){
+                    if((i >= 0 && i <= 9) && (j >= 0 && j <= 7)){
                         if(mines.contains((i*8) + j)){
                             count++;
                         }
@@ -112,10 +111,11 @@ public class MainActivity extends AppCompatActivity {
         if(flagging){
             tv.setText(R.string.flag);
             tv.setTextColor(Color.GRAY);
+
+            TextView mode = (TextView) findViewById(R.id.textViewFlagCount);
+            mode.setText(String.valueOf(Integer.parseInt(mode.getText().toString())-1));
         } else {
-            tv.setText(String.valueOf(detectMines(n)));
-            tv.setTextColor(Color.GRAY);
-            tv.setBackgroundColor(Color.LTGRAY);
+            reveal(n);
         }
     }
 
@@ -135,9 +135,29 @@ public class MainActivity extends AppCompatActivity {
         int j = index[1];
         if(cell_tvs[i][j].getCurrentTextColor() == Color.GREEN){
             int mines = detectMines(index);
-            cell_tvs[i][j].setText(String.valueOf(mines));
-            cell_tvs[i][j].setTextColor(Color.GRAY);
-            cell_tvs[i][j].setBackgroundColor(Color.LTGRAY);
+            if(mines == -1){
+                cell_tvs[i][j].setText(R.string.bomb);
+                cell_tvs[i][j].setTextColor(Color.GRAY);
+                cell_tvs[i][j].setBackgroundColor(Color.LTGRAY);
+            } else if (mines > 0){
+                cell_tvs[i][j].setText(String.valueOf(mines));
+                cell_tvs[i][j].setTextColor(Color.GRAY);
+                cell_tvs[i][j].setBackgroundColor(Color.LTGRAY);
+            } else {
+                cell_tvs[i][j].setText("");
+                cell_tvs[i][j].setTextColor(Color.GRAY);
+                cell_tvs[i][j].setBackgroundColor(Color.LTGRAY);
+                for(int m = index[0] - 1; m < index[0] + 2; m++){
+                    for(int n = index[1] - 1; n < index[1] + 2; n++){
+                        if((m >= 0 && m <= 9) && (n >= 0 && n <= 7)){
+                            int[] neighbor = new int[2];
+                            neighbor[0] = m;
+                            neighbor[1] = n;
+                            reveal(neighbor);
+                        }
+                    }
+                }
+            }
         }
     }
 }

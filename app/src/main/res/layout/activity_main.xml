@@ -49,7 +49,7 @@
         android:layout_height="48dp"
         android:width="64dp"
         android:height="64dp"
-        android:text="4"
+        android:text="@string/flagCount"
         android:textAlignment="center"
         android:textSize="32sp"
         app:layout_column="0"
