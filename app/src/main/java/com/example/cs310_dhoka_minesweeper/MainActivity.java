@@ -7,6 +7,7 @@ import androidx.gridlayout.widget.GridLayout;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.TextView;
 
@@ -19,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView[][] cell_tvs;
     private ArrayList<Integer> mines;
     private boolean flagging = false;
+    private int clock;
 
     private int dpToPixel(int dp) {
         float density = Resources.getSystem().getDisplayMetrics().density;
@@ -87,6 +89,9 @@ public class MainActivity extends AppCompatActivity {
                 cell_tvs[i][j] = tv;
             }
         }
+
+        clock = 0;
+        runTimer();
     }
 
     private int[] findIndexOfCellTextView(TextView tv) {
@@ -159,5 +164,19 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    private void runTimer() {
+        final TextView timeView = (TextView) findViewById(R.id.textViewTimeCount);
+        final Handler handler = new Handler();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                timeView.setText(String.valueOf(clock));
+                clock++;
+                handler.postDelayed(this, 1000);
+            }
+        });
     }
 }
