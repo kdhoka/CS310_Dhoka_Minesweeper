@@ -109,9 +109,14 @@ public class MainActivity extends AppCompatActivity {
     public void onClickTV(View view){
         TextView tv = (TextView) view;
         int[] n = findIndexOfCellTextView(tv);
-        tv.setText(String.valueOf(detectMines(n)));
-        tv.setTextColor(Color.GRAY);
-        tv.setBackgroundColor(Color.LTGRAY);
+        if(flagging){
+            tv.setText(R.string.flag);
+            tv.setTextColor(Color.GRAY);
+        } else {
+            tv.setText(String.valueOf(detectMines(n)));
+            tv.setTextColor(Color.GRAY);
+            tv.setBackgroundColor(Color.LTGRAY);
+        }
     }
 
     public void onClickMode(View view){
@@ -122,6 +127,17 @@ public class MainActivity extends AppCompatActivity {
         } else {
             tv.setText(R.string.pick);
             flagging = false;
+        }
+    }
+
+    public void reveal(int[] index){
+        int i = index[0];
+        int j = index[1];
+        if(cell_tvs[i][j].getCurrentTextColor() == Color.GREEN){
+            int mines = detectMines(index);
+            cell_tvs[i][j].setText(String.valueOf(mines));
+            cell_tvs[i][j].setTextColor(Color.GRAY);
+            cell_tvs[i][j].setBackgroundColor(Color.LTGRAY);
         }
     }
 }
