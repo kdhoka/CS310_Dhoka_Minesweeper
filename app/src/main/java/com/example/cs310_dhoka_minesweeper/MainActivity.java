@@ -114,11 +114,17 @@ public class MainActivity extends AppCompatActivity {
         TextView tv = (TextView) view;
         int[] n = findIndexOfCellTextView(tv);
         if(flagging){
-            tv.setText(R.string.flag);
-            tv.setTextColor(Color.GRAY);
-
-            TextView mode = (TextView) findViewById(R.id.textViewFlagCount);
-            mode.setText(String.valueOf(Integer.parseInt(mode.getText().toString())-1));
+            if(tv.getCurrentTextColor() == Color.GREEN) {
+                tv.setText(R.string.flag);
+                tv.setTextColor(Color.GRAY);
+                TextView mode = (TextView) findViewById(R.id.textViewFlagCount);
+                mode.setText(String.valueOf(Integer.parseInt(mode.getText().toString())-1));
+            } else if(tv.getText().toString().equals(getString(R.string.flag))){
+                tv.setText("");
+                tv.setTextColor(Color.GREEN);
+                TextView mode = (TextView) findViewById(R.id.textViewFlagCount);
+                mode.setText(String.valueOf(Integer.parseInt(mode.getText().toString())+1));
+            }
         } else {
             reveal(n);
         }
@@ -178,5 +184,10 @@ public class MainActivity extends AppCompatActivity {
                 handler.postDelayed(this, 1000);
             }
         });
+    }
+
+    private boolean checkWin(){
+
+        return true;
     }
 }
