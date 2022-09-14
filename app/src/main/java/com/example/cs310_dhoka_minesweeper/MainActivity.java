@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
             }
             if(checkWin()){
                 running = false;
+                showMines(Color.CYAN);
                 intent = new Intent(this, EndScreen.class);
                 intent.putExtra("win",true);
                 intent.putExtra("time",clock);
@@ -164,10 +165,6 @@ public class MainActivity extends AppCompatActivity {
         if(cell_tvs[i][j].getCurrentTextColor() == Color.GREEN){
             int mines = detectMines(index);
             if(mines == -1){
-//                cell_tvs[i][j].setText(R.string.mine);
-//                cell_tvs[i][j].setTextColor(Color.GRAY);
-//                cell_tvs[i][j].setBackgroundColor(Color.RED);
-                running = false;
                 lose();
             } else if (mines > 0){
                 cell_tvs[i][j].setText(String.valueOf(mines));
@@ -227,17 +224,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void lose(){
+        running = false;
+        showMines(Color.RED);
+        intent = new Intent(this, EndScreen.class);
+        intent.putExtra("win",false);
+        intent.putExtra("time",clock);
+    }
+
+    private void showMines(int color){
         int i, j;
         for(int num = 0; num < MINE_COUNT; num++){
             i = mines.get(num)/COLUMN_COUNT;
             j = mines.get(num)%COLUMN_COUNT;
             cell_tvs[i][j].setText(R.string.mine);
             cell_tvs[i][j].setTextColor(Color.GRAY);
-            cell_tvs[i][j].setBackgroundColor(Color.RED);
+            cell_tvs[i][j].setBackgroundColor(color);
         }
-
-        intent = new Intent(this, EndScreen.class);
-        intent.putExtra("win",false);
-        intent.putExtra("time",clock);
     }
 }
