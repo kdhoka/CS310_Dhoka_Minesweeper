@@ -25,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<Integer> mines;
     private boolean flagging = false;
     private int clock;
+    private boolean running;
+    private Intent intent;
 
     private int dpToPixel(int dp) {
         float density = Resources.getSystem().getDisplayMetrics().density;
@@ -95,6 +97,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         clock = 0;
+        running = true;
         runTimer();
     }
 
@@ -115,28 +118,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickTV(View view){
-        TextView tv = (TextView) view;
-        int[] n = findIndexOfCellTextView(tv);
-        if(flagging){
-            if(tv.getCurrentTextColor() == Color.GREEN) {
-                tv.setText(R.string.flag);
-                tv.setTextColor(Color.GRAY);
-                TextView flags = (TextView) findViewById(R.id.textViewFlagCount);
-                flags.setText(String.valueOf(Integer.parseInt(flags.getText().toString())-1));
-            } else if(tv.getText().toString().equals(getString(R.string.flag))){
-                tv.setText("");
-                tv.setTextColor(Color.GREEN);
-                TextView flags = (TextView) findViewById(R.id.textViewFlagCount);
-                flags.setText(String.valueOf(Integer.parseInt(flags.getText().toString())+1));
-            }
-        } else {
-            reveal(n);
-        }
-        if(checkWin()){
-            Intent intent = new Intent(this, EndScreen.class);
-            intent.putExtra("win",true);
-            intent.putExtra("time",clock);
+        if(!running){
             startActivity(intent);
+        } else {
+            TextView tv = (TextView) view;
+            int[] n = findIndexOfCellTextView(tv);
+            if(flagging){
+                if(tv.getCurrentTextColor() == Color.GREEN) {
+                    tv.setText(R.string.flag);
+                    tv.setTextColor(Color.GRAY);
+                    TextView flags = (TextView) findViewById(R.id.textViewFlagCount);
+                    flags.setText(String.valueOf(Integer.parseInt(flags.getText().toString())-1));
+                } else if(tv.getText().toString().equals(getString(R.string.flag))){
+                    tv.setText("");
+                    tv.setTextColor(Color.GREEN);
+                    TextView flags = (TextView) findViewById(R.id.textViewFlagCount);
+                    flags.setText(String.valueOf(Integer.parseInt(flags.getText().toString())+1));
+                }
+            } else {
+                reveal(n);
+            }
+            if(checkWin()){
+                running = false;
+                intent = new Intent(this, EndScreen.class);
+                intent.putExtra("win",true);
+                intent.putExtra("time",clock);
+            }
         }
     }
 
@@ -157,9 +164,10 @@ public class MainActivity extends AppCompatActivity {
         if(cell_tvs[i][j].getCurrentTextColor() == Color.GREEN){
             int mines = detectMines(index);
             if(mines == -1){
-                cell_tvs[i][j].setText(R.string.mine);
-                cell_tvs[i][j].setTextColor(Color.GRAY);
-                cell_tvs[i][j].setBackgroundColor(Color.LTGRAY);
+//                cell_tvs[i][j].setText(R.string.mine);
+//                cell_tvs[i][j].setTextColor(Color.GRAY);
+//                cell_tvs[i][j].setBackgroundColor(Color.RED);
+                running = false;
                 lose();
             } else if (mines > 0){
                 cell_tvs[i][j].setText(String.valueOf(mines));
@@ -191,7 +199,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 timeView.setText(String.valueOf(clock));
-                clock++;
+                if(running){
+                    clock++;
+                }
                 handler.postDelayed(this, 1000);
             }
         });
@@ -201,8 +211,12 @@ public class MainActivity extends AppCompatActivity {
         int count = 0;
         for(int i = 0; i < ROW_COUNT; i++){
             for(int j = 0; j < COLUMN_COUNT; j++){
-                if(((ColorDrawable) cell_tvs[i][j].getBackground()).getColor() == Color.parseColor("lime")){
+                int color = ((ColorDrawable) cell_tvs[i][j].getBackground()).getColor();
+                if(color == Color.parseColor("lime")){
                     count++;
+                }
+                if(color == Color.parseColor("red")){
+                    return false;
                 }
                 if(count > MINE_COUNT){
                     return false;
@@ -213,9 +227,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void lose(){
-        Intent intent = new Intent(this, EndScreen.class);
+        int i, j;
+        for(int num = 0; num < MINE_COUNT; num++){
+            i = mines.get(num)/COLUMN_COUNT;
+            j = mines.get(num)%COLUMN_COUNT;
+            cell_tvs[i][j].setText(R.string.mine);
+            cell_tvs[i][j].setTextColor(Color.GRAY);
+            cell_tvs[i][j].setBackgroundColor(Color.RED);
+        }
+
+        intent = new Intent(this, EndScreen.class);
         intent.putExtra("win",false);
         intent.putExtra("time",clock);
-        startActivity(intent);
     }
 }
